@@ -1,0 +1,57 @@
+
+#include <stdio.h>
+#include <fftw3.h>
+#include <stdlib.h>
+
+#define BUFSZ 80
+
+int main( int argc, char *argv[]) {
+
+  int nPoints = 500;		/* arbitrary! */
+
+  double in[nPoints];
+  fftw_complex out[nPoints];
+  double power_spectrum[nPoints/2+1];
+  fftw_plan p;
+  int k;
+
+  FILE *fp;
+  char buff[BUFSZ];
+  double y0val, y1val;
+  int xval;
+
+  if( (fp = fopen( argv[1], "r")) == NULL) {
+    fprintf( stderr, "Can't open input %s\n", argv[1]);
+    exit(1);
+  }
+
+  // read nPoints data points
+  // expect data value in 2nd column
+  for( k=0; k<nPoints; k++) {
+    if( fgets( buff, BUFSZ, fp) == NULL) {
+      fprintf( stderr, "EOF on input after %d points\n", k);
+      exit(1);
+    }
+    int ns = sscanf( buff, "%d %lf %lf", &xval, &y0val, &y1val);
+    if( ns != 3) {
+      fprintf( stderr, "unexpected data format in %s at line %d\n", buff, k);
+      exit(1);
+    }
+    in[k] = y0val; 
+  }
+
+  p = fftw_plan_dft_r2c_1d( nPoints, in, out, FFTW_ESTIMATE);
+ 
+  fftw_execute( p);
+  power_spectrum[0] = out[0][0]*out[0][0];  /* DC component */
+  for (k = 1; k < (nPoints+1)/2; ++k) {  /* (k < N/2 rounded up) */
+    power_spectrum[k] = out[k][0]*out[k][0] + out[nPoints-k][0]*out[nPoints-k][0];
+    printf("%d %lf %lf\n", k, out[k][0], power_spectrum[k]);
+  }
+  if (nPoints % 2 == 0) /* N is even */
+    power_spectrum[nPoints/2] = out[nPoints/2][0]*out[nPoints/2][0];  /* Nyquist freq. */
+
+  
+
+  fftw_destroy_plan(p);
+}

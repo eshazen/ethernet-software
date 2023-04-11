@@ -1,0 +1,5 @@
+
+// run FFT using fftw library.  Return length of power_spectrum or -1 on error
+int run_fft( int nsamp, double *data, double *power_spectrum);
+// search power spectrum for peaks.  Store list of up to maxpk peaks, return peakk count
+int find_peaks( int len_pwr, double *power_spectrum, double *peak_list, int maxpk);
