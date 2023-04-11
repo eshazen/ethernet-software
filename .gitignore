@@ -46,3 +46,13 @@ flycheck_*.el
 
 # network security
 /network-security.data
+
+*.o
+client
+server
+bi_client
+bi_server
+wu_client
+wu_server
+dosi_client
+fftw_test
