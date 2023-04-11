@@ -1,7 +1,7 @@
-sn 10
-sx 100
+sn 97
+sx 1000
 ss 5
-sf 3
+sf 1
 sd 001100
 sw 1
 mt

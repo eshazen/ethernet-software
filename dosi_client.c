@@ -50,6 +50,7 @@ int main(int argc, char *argv[])
   int s;
   int len;
   int go = 0;
+  int interact = 0;
 
   host = "169.254.3.3";
   conf = NULL;
@@ -74,12 +75,18 @@ int main(int argc, char *argv[])
 	  ++i;
 	  dataf = argv[i];
 	  break;
+	case 'I':
+	  interact = 1;
+	  break;
 	default:
 	  printf("unknown option '%c'\n", argv[i][1]);
 	  exit( 1);
 	}
       }
-    }
+    } 
+  } else {
+    printf("usage: %s [-h host_ip] [-c config] [-d datafile] [-i]\n", argv[0]);
+    exit(-1);
   }
 
   printf("host = %s  config = %s   data file = %s\n", host, conf, dataf);
@@ -173,7 +180,7 @@ int main(int argc, char *argv[])
 	  }
 	}
       }
-      fclose( fp);
+      //      fclose( fp);
       exit(0);
     }
   }

@@ -70,6 +70,8 @@ int main( int argc, char *argv[]) {
   double power_spectrum[nPoints/2+1];
 
   double interval = SAMP_RATE / nPoints; /* output frequency interval */
+  fprintf( stderr, "For sample rate %f/s using %d points, interval = %g Hz\n",
+	   SAMP_RATE, nPoints, interval);
 
   if( (fp = fopen( file_in, "r")) == NULL) {
     fprintf( stderr, "Can't open input %s\n", file_in);
@@ -101,7 +103,7 @@ int main( int argc, char *argv[]) {
   // check for errors
   for( k=0; k<nPoints; k++)
     if( !isfinite(out[k][0]) || !isfinite(out[k][1])) {
-      printf("ERROR in output (infinity) at %d\n", k);
+      fprintf( stderr, "ERROR in output (infinity) at %d\n", k);
       exit(-1);
     }
 
