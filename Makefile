@@ -4,10 +4,14 @@ CFLAGS=-std=c99 -DBINARY_DATA
 # use line below for ascii data demo
 #CFLAGS=-std=c99
 
-all: client server bi_client bi_server wu_client wu_server dosi_client fftw_test
+all: client server bi_client bi_server wu_client wu_server dosi_client analyze_adc
 
 clean:
 	rm -f *~ *.o client server bi_client bi_server wu_client wu_server dosi_client
 
-fftw_test: fftw_test.o
-	cc -o fftw_test fftw_test.o -lm -lfftw3
+analyze_adc.o: analyze_adc.c fft.h
+
+fft.o: fft.c fft.h
+
+analyze_adc: analyze_adc.o fft.o
+	cc -o analyze_adc analyze_adc.o fft.o -lm -lfftw3

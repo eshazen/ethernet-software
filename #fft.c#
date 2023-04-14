@@ -1,9 +1,0 @@
-//
-// simple wrapper for FFTW library to perform a real, one-dimensional DFT
-//
-// run_fft - run a DFT on data, return the power spectrum.
-//           return -1 on error, or the length of the power_spectrum (int)((nsamp+1)/2)
-//
-int run_fft( int nsamp, double *data, double *power_spectrum) {
-  
-}

@@ -48,6 +48,7 @@ flycheck_*.el
 /network-security.data
 
 *.o
+*.dat
 client
 server
 bi_client
@@ -56,3 +57,4 @@ wu_client
 wu_server
 dosi_client
 fftw_test
+analyze_adc

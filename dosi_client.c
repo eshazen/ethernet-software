@@ -143,7 +143,9 @@ int main(int argc, char *argv[])
    */
   if( conf) {
     while( !go && (fgets( buf, sizeof(buf), fpc) != NULL) ) {
-      if( *buf == 'g') {
+      if( *buf == '#') {
+	printf("%s", buf);
+      } else if( *buf == 'g') {
 	printf("Saw GO\n");
 	go = 1;
       } else {
