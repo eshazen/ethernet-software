@@ -14,6 +14,7 @@
 //   -O <ndds>       number of DDS outputs enabled
 //   -L <slop>       specify threshold for peak finding.  Default is 1000
 //                   This is in power spectrum units as a multiple of median power
+//   -M              calculate mean, RMS and eventually other stats on waveform
 
 #include <stdio.h>
 #include <fftw3.h>
@@ -58,14 +59,18 @@ int main( int argc, char *argv[]) {
   int varb = 0;
   int peaks = 0;
   int spec = 0;
+  int stats = 0;
   double peak_slope = 1000;
 
-  double *in;
+  double *dataIn;
 
   if( argc > 1) {
     for( int i=1; i<argc; i++) {
       if( *argv[i] == '-') {
 	switch( toupper( argv[i][1])) {
+	case 'M':
+	  stats = 1;
+	  break;
 	case 'O':
 	  check_arg( i, 1, argc, argv);
 	  ++i;
@@ -137,7 +142,7 @@ int main( int argc, char *argv[]) {
     while( fgets( buff, BUFSZ, fp))
       ++wPoints;
     fprintf( stderr, "%d lines in text file\n", wPoints);
-    if( (in = calloc( wPoints, sizeof(*in))) == NULL) {
+    if( (dataIn = calloc( wPoints, sizeof(*dataIn))) == NULL) {
       fprintf( stderr, "Allocation fail for %d samples\n", wPoints);
       exit( -1);
     }
@@ -154,9 +159,9 @@ int main( int argc, char *argv[]) {
 	exit(1);
       }
       if( varb == 0)
-	in[k] = y0val;
+	dataIn[k] = y0val;
       else
-	in[k] = y1val;
+	dataIn[k] = y1val;
     }
   } else {
     // --- binary data input ---
@@ -192,7 +197,7 @@ int main( int argc, char *argv[]) {
     int numWf = extra / 4;
     fprintf( stderr, "Assuming there are %d waveform segments\n", numWf);
 
-    if( (in = calloc( wPoints, sizeof(*in))) == NULL) {
+    if( (dataIn = calloc( wPoints, sizeof(*dataIn))) == NULL) {
       fprintf( stderr, "Allocation fail for %d samples\n", wPoints);
       exit( -1);
     }
@@ -205,11 +210,11 @@ int main( int argc, char *argv[]) {
       v1 = (int16_t)((s & 0xffff));
       v2 = (int16_t)((s>>16)&0xffff);
       if( varb == 1)
-	in[k] = v2;
+	dataIn[k] = v2;
       else
-	in[k] = v1;
+	dataIn[k] = v1;
       if( debug) printf("%d raw 0x%08x v1 0x%04x v2 0x%04x in %f\n",
-			k, s, v1, v2, in[k]);
+			k, s, v1, v2, dataIn[k]);
     }
   }
 
@@ -220,16 +225,16 @@ int main( int argc, char *argv[]) {
   }
 
   if( debug) {
-    for( int i=0; i<10; i++) printf("  %d = %f\n", i, in[iPoint+i]);
+    for( int i=0; i<10; i++) printf("  %d = %f\n", i, dataIn[iPoint+i]);
     printf( "   ...\n");
-    for( int i=nPoints-10; i<nPoints; i++) printf("  %d = %f\n", i, in[iPoint+i]);
+    for( int i=nPoints-10; i<nPoints; i++) printf("  %d = %f\n", i, dataIn[iPoint+i]);
   }
 
-  int nps = real_dft( nPoints, &in[iPoint], NULL, NULL);
+  int nps = real_dft( nPoints, &dataIn[iPoint], NULL, NULL);
   double power_spectrum[nps];
   double power_frequency[nps];
 
-  nps = real_dft( nPoints, &in[iPoint], power_spectrum, power_frequency);
+  nps = real_dft( nPoints, &dataIn[iPoint], power_spectrum, power_frequency);
   if( nps < 0) {
     fprintf( stderr, "Error in DFT!\n");
     exit(-1);
@@ -254,5 +259,20 @@ int main( int argc, char *argv[]) {
       for( int i=0; i<np; i++)
 	printf("%d %9.3f MHz %9.3g mag\n", i, peak_freq[i]/1e6, peak_mag[i]);
     }
+  }
+
+  // statistics
+  if( stats) {
+    // mean
+    double mean = 0;
+    double rmsd = 0;
+    
+    for( int i=0; i<nPoints; i++)
+      mean += dataIn[i];
+    mean /= nPoints;
+    for( int i=0; i<nPoints; i++)
+      rmsd += (dataIn[i]-mean)*(dataIn[i]-mean);
+    rmsd /= nPoints;
+    printf("mean %lf RMSD %lf\n", mean, rmsd);
   }
 }
